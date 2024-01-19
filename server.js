@@ -4,8 +4,10 @@ require('dotenv').config();
 const cors = require('cors');
 const argv = require('minimist')(process.argv.slice(2));
 const express = require('express');
+const https = require("https");
 const bodyParser = require('body-parser');
 const gzipProcessor = require('connect-gzip-static');
+const fs = require("fs");
 // const updateNotifier = require('update-notifier'); commeting this as its dependents have vulnarablities
 
 const dataAccessAdapter = require('./src/db/dataAccessAdapter');
@@ -48,9 +50,22 @@ dataAccessAdapter.InitDB(app);
 
 // listen on :port once the app is connected to the MongoDB
 app.once('connectedToDB', () => {
-  const port = argv.p || process.env.PORT || 4321;
-  app.listen(port, () => {
-    console.log(`> Access Mongo GUI at http://localhost:${port}`);
+  const port = argv.p || process.env.PORT || 3001;
+  const privkeyFile = argv.privkey || process.env.PRIVKEY;
+  const certFile = argv.cert || process.env.CERT;
+  const minTlsVersion = argv.minTLS || process.env.MIN_TLS_VERSION || 'TLSv1.2';
+  const maxTlsVersion = argv.maxTLS || process.env.MAX_TLS_VERSION || 'TLSv1.3';
+
+  const serverOptions = {
+    cert: fs.readFileSync(certFile),
+    key: fs.readFileSync(privkeyFile),
+    maxVersion: maxTlsVersion,
+    minVersion: minTlsVersion
+  }
+
+  const server = require('https').Server(serverOptions, app);
+  server.listen(port, () => { 
+    console.log(`[-] Server listening on port ${port}`); 
   });
 });
 
