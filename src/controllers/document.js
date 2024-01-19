@@ -1,6 +1,6 @@
 const ObjectID = require('mongodb').ObjectID;
 const EJSON = require('bson').EJSON;
-const openai = require('../services/openai');  
+// const openai = require('../services/openai');
 const Model = require('../models');
 
 
@@ -106,47 +106,47 @@ function deleteOne(req, res, next) {
   sendResponse(dbOperation, req, res, next);
 }
 
-const getQueryFromPrompt = async (req) => {
-  try {
-    // if (req.query.queryType !== 'prompt' || !req.query.prompt) return null;
-    const model = getModel(req);
-    const data = await model.aggregate([
-      {
-          $project: {
-              arrayOfKeyValues: {$objectToArray: "$$ROOT"}
-          }
-      },
-      {
-          $unwind: "$arrayOfKeyValues"
-      },
-      {
-          $group: {
-              _id: {
-                  key: "$arrayOfKeyValues.k",
-                  type: {$type: "$arrayOfKeyValues.v"}
-              }
-          }
-      },
-      {
-          $group: {
-              _id: null,
-              allKeysAndTypes: {
-                  $addToSet: {
-                      key: "$_id.key",
-                      type: "$_id.type"
-                  }
-              }
-          }
-      }
-    ]).toArray();
-    const query = await openai.getQuery(data[0].allKeysAndTypes, req.body.prompt);
-    console.log(query);
-    return query;
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
-}
+// const getQueryFromPrompt = async (req) => {
+//   try {
+//     // if (req.query.queryType !== 'prompt' || !req.query.prompt) return null;
+//     const model = getModel(req);
+//     const data = await model.aggregate([
+//       {
+//           $project: {
+//               arrayOfKeyValues: {$objectToArray: "$$ROOT"}
+//           }
+//       },
+//       {
+//           $unwind: "$arrayOfKeyValues"
+//       },
+//       {
+//           $group: {
+//               _id: {
+//                   key: "$arrayOfKeyValues.k",
+//                   type: {$type: "$arrayOfKeyValues.v"}
+//               }
+//           }
+//       },
+//       {
+//           $group: {
+//               _id: null,
+//               allKeysAndTypes: {
+//                   $addToSet: {
+//                       key: "$_id.key",
+//                       type: "$_id.type"
+//                   }
+//               }
+//           }
+//       }
+//     ]).toArray();
+//     const query = await openai.getQuery(data[0].allKeysAndTypes, req.body.prompt);
+//     console.log(query);
+//     return query;
+//   } catch (err) {
+//     console.log(err);
+//     return null;
+//   }
+// }
 
 const filter = async (req, res, next) => {
   let query = {};
