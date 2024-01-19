@@ -13,9 +13,10 @@ class DataBase {
 
   static InitDB(app) {
     const url = argv.u || process.env.URL || 'mongodb://localhost:27017';
+    const caCertFile = argv.cacert || process.env.CA_CERT;
 
     console.log(`> Connecting to mongoDB @ ${url}`);
-    mongoClient.connect(url, { useUnifiedTopology: true })
+    mongoClient.connect(url, { tlsCAFile: caCertFile } )
       .then(client => {
         if (!client) {
           console.log('> Failed to connect mongoDB -  no client');
